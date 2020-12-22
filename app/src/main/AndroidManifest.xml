@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.hu1won.jeonghyeon">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -14,7 +15,8 @@
         android:usesCleartextTraffic="true">
         <activity android:name=".search_page"></activity>
         <activity android:name=".MainActivity"></activity>
-        <activity android:name=".Introduce"></activity>
+        <activity android:name=".Introduce"
+            tools:ignore="Instantiatable"></activity>
         <activity android:name=".NotesListActivity"></activity>
         <activity
             android:name=".NoteActivity"
@@ -25,8 +27,7 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-        <activity android:name=".Splash"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        <activity android:name=".Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
