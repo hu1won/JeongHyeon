@@ -1,0 +1,150 @@
+package com.hu1won.jeonghyeon;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
+import androidx.core.widget.CompoundButtonCompat;
+import androidx.fragment.app.DialogFragment;
+
+import com.enrico.colorpicker.colorDialog;
+
+public class SettingsActivity extends AppCompatActivity implements colorDialog.ColorSelectedListener {
+
+    private boolean colourNavbar;
+    private ImageView imageAccent, imageFont, imageBackground;
+    private CheckBox navBox;
+    private SharedPreferences preferences;
+
+    private @ColorInt
+    int colourPrimary, colourFont, colourBackground;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_settings);
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this);
+        imageAccent = findViewById(R.id.image_accent);
+        imageFont = findViewById(R.id.image_font);
+        imageBackground = findViewById(R.id.image_background);
+
+        getSettings(preferences);
+        applySettings();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    public void onColorSelection(DialogFragment dialogFragment, @ColorInt int selectedColor) {
+        int tag = Integer.valueOf(dialogFragment.getTag());
+
+        switch (tag) {
+            case 1:
+                colourPrimary = ColorUtils.setAlphaComponent(selectedColor, 255);
+                imageAccent.setColorFilter(colourPrimary);
+                break;
+
+            case 2:
+                colourFont = ColorUtils.setAlphaComponent(selectedColor, 255);
+                imageFont.setColorFilter(colourFont);
+                break;
+
+            case 3:
+                colourBackground = ColorUtils.setAlphaComponent(selectedColor, 255);
+                imageBackground.setColorFilter(colourBackground);
+                break;
+        }
+    }
+
+    private void getSettings(SharedPreferences preferences) {
+        colourPrimary = preferences.getInt(HelperUtils.PREFERENCE_COLOUR_PRIMARY, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
+        colourFont = preferences.getInt(HelperUtils.PREFERENCE_COLOUR_FONT, Color.BLACK);
+        colourBackground = preferences.getInt(HelperUtils.PREFERENCE_COLOUR_BACKGROUND, Color.WHITE);
+        colourNavbar = preferences.getBoolean(HelperUtils.PREFERENCE_COLOUR_NAVBAR, false);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void applySettings() {
+        HelperUtils.applyColours(SettingsActivity.this, colourPrimary, colourNavbar);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(colourPrimary));
+            getSupportActionBar().setTitle(getString(R.string.settings));
+        }
+
+        findViewById(R.id.layout_constraint).setBackgroundColor(colourBackground);
+
+        imageAccent.setColorFilter(colourPrimary);
+        imageFont.setColorFilter(colourFont);
+        imageBackground.setColorFilter(colourBackground);
+
+        imageAccent.getBackground().setColorFilter(colourPrimary, PorterDuff.Mode.SRC_ATOP);
+        imageFont.getBackground().setColorFilter(colourPrimary, PorterDuff.Mode.SRC_ATOP);
+        imageBackground.getBackground().setColorFilter(colourPrimary, PorterDuff.Mode.SRC_ATOP);
+
+        ((TextView) findViewById(R.id.tv_accent)).setTextColor(colourFont);
+        ((TextView) findViewById(R.id.tv_font)).setTextColor(colourFont);
+        ((TextView) findViewById(R.id.tv_background)).setTextColor(colourFont);
+        ((TextView) findViewById(R.id.tv_navigationbar)).setTextColor(colourFont);
+
+        ((LinearLayout) findViewById(R.id.settingsLayout)).getDividerDrawable().setColorFilter(colourPrimary, PorterDuff.Mode.SRC_ATOP);
+        findViewById(R.id.btn_apply).getBackground().setColorFilter(colourPrimary, PorterDuff.Mode.SRC_ATOP);
+
+        navBox = findViewById(R.id.checkbox_navigationbar);
+        navBox.setChecked(colourNavbar);
+        CompoundButtonCompat.setButtonTintList(navBox, ColorStateList.valueOf(colourPrimary));
+    }
+
+    public void saveSettings(View view) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(HelperUtils.PREFERENCE_COLOUR_PRIMARY, colourPrimary);
+        editor.putInt(HelperUtils.PREFERENCE_COLOUR_FONT, colourFont);
+        editor.putInt(HelperUtils.PREFERENCE_COLOUR_BACKGROUND, colourBackground);
+        editor.putBoolean(HelperUtils.PREFERENCE_COLOUR_NAVBAR, navBox.isChecked());
+        editor.apply();
+
+        startActivity(new Intent(SettingsActivity.this, NotesListActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+        finish();
+    }
+
+    public void showPicker1(View view) {
+        colorDialog.setPickerColor(SettingsActivity.this, 1, colourPrimary);
+        colorDialog.showColorPicker(SettingsActivity.this, 1);
+    }
+
+    public void showPicker2(View view) {
+        colorDialog.setPickerColor(SettingsActivity.this, 2, colourFont);
+        colorDialog.showColorPicker(SettingsActivity.this, 2);
+    }
+
+    public void showPicker3(View view) {
+        colorDialog.setPickerColor(SettingsActivity.this, 3, colourBackground);
+        colorDialog.showColorPicker(SettingsActivity.this, 3);
+    }
+
+    public void toggleCheckBox(View view) {
+        navBox.toggle();
+    }
+
+}

@@ -83,14 +83,13 @@ public class MainActivity extends AppCompatActivity {
                     GetData task = new GetData();
                     task.execute("http://49.246.37.135/jsmon_json_api/jsmon_api.php");
                 }
-                // 동글동글 도는거 사라짐
                 mSwipeRefreshLayout.setRefreshing(false);
 
             }
         });
 
         bottomNavigationView = findViewById(R.id.nav_view);
-        bottomNavigationView.setItemIconTintList(null); // 아이콘 색깔 보이게끔 해줌
+        bottomNavigationView.setItemIconTintList(null); // 아이콘 색깔 on
         bottomNavigationView.setItemIconSize(90);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -119,9 +118,14 @@ public class MainActivity extends AppCompatActivity {
                             bottomNavigationView.setBackgroundColor(Color.parseColor("#FF6F61"));
                         }
                         return true;
-                    case R.id.navigation_5:
-                        Intent intent2 = new Intent(MainActivity.this, Introduce.class);
+                    case R.id.navigation_4:
+                        bottomNavigationView.setBackgroundColor(Color.parseColor("#ffc107"));
+                        Intent intent2 = new Intent(MainActivity.this, NotesListActivity.class);
                         startActivity(intent2);
+                        return true;
+                    case R.id.navigation_5:
+                        Intent intent3 = new Intent(MainActivity.this, Introduce.class);
+                        startActivity(intent3);
                         return true;
                 }
                 return false;

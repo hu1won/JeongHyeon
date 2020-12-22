@@ -1,0 +1,24 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".NoteActivity">
+
+    <item
+        android:id="@+id/btn_search"
+        android:title="@string/search"
+        app:actionViewClass="android.widget.SearchView"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/btn_sort"
+        android:icon="@drawable/numeric_to_alphabetical"
+        android:title="@string/sort"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/btn_settings"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="@string/settings"
+        app:showAsAction="ifRoom" />
+
+</menu>

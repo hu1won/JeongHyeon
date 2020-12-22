@@ -1,0 +1,237 @@
+package com.hu1won.jeonghyeon;
+
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.EditText;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
+
+public class NoteActivity extends AppCompatActivity {
+
+    private static final String EXTRA_NOTE_TITLE = "EXTRA_NOTE_TITLE";
+
+    private boolean colourNavbar;
+    private String title, note;
+    private EditText noteText, titleText;
+    private AlertDialog dialog;
+
+    private @ColorInt
+    int colourPrimary, colourFont, colourBackground;
+
+    public static Intent getStartIntent(Context context, String title) {
+        Intent intent = new Intent(context, NoteActivity.class);
+        intent.putExtra(EXTRA_NOTE_TITLE, title);
+        return intent;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_note);
+        titleText = findViewById(R.id.et_title);
+        noteText = findViewById(R.id.et_note);
+
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                noteText.setText(sharedText);
+                note = sharedText;
+                title = "";
+            }
+        } else {
+            title = intent.getStringExtra(EXTRA_NOTE_TITLE);
+            if (title == null || TextUtils.isEmpty(title)) {
+                title = "";
+                note = "";
+                noteText.requestFocus();
+                if (getSupportActionBar() != null)
+                    getSupportActionBar().setTitle(getString(R.string.new_note));
+            } else {
+                titleText.setText(title);
+                note = HelperUtils.readFile(NoteActivity.this, title);
+                noteText.setText(note);
+                if (getSupportActionBar() != null)
+                    getSupportActionBar().setTitle(title);
+            }
+        }
+
+        getSettings(PreferenceManager.getDefaultSharedPreferences(NoteActivity.this));
+        applySettings();
+    }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        note = noteText.getText().toString().trim();
+        if (getCurrentFocus() != null)
+            getCurrentFocus().clearFocus();
+    }
+
+    @Override
+    public void onPause() {
+        if (!isChangingConfigurations()) {
+            saveFile();
+        }
+        if (dialog != null && dialog.isShowing())
+            dialog.dismiss();
+        dialog = null;
+        super.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_note, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.btn_undo:
+                noteText.setText(note);
+                noteText.setSelection(noteText.getText().length());
+                return (true);
+
+            case R.id.btn_share:
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, noteText.getText().toString());
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent, getString(R.string.share_to)));
+                return (true);
+
+            case R.id.btn_delete:
+                dialog = new AlertDialog.Builder(NoteActivity.this, R.style.AlertDialogTheme)
+                        .setTitle(getString(R.string.confirm_delete))
+                        .setMessage(getString(R.string.confirm_delete_text))
+                        .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (HelperUtils.fileExists(NoteActivity.this, title)) {
+                                    deleteFile(title + HelperUtils.TEXT_FILE_EXTENSION);
+                                }
+                                title = "";
+                                note = "";
+                                titleText.setText(title);
+                                noteText.setText(note);
+                                finish();
+                            }
+                        })
+                        .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_delete_white_24dp))
+                        .show();
+                if (dialog.getWindow() != null) {
+                    dialog.getWindow().getDecorView().setBackgroundColor(colourPrimary);
+                }
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(Color.WHITE);
+                dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
+                return (true);
+        }
+        return (super.onOptionsItemSelected(item));
+    }
+
+    private void getSettings(SharedPreferences preferences) {
+        colourPrimary = preferences.getInt(HelperUtils.PREFERENCE_COLOUR_PRIMARY, ContextCompat.getColor(NoteActivity.this, R.color.colorPrimary));
+        colourFont = preferences.getInt(HelperUtils.PREFERENCE_COLOUR_FONT, Color.BLACK);
+        colourBackground = preferences.getInt(HelperUtils.PREFERENCE_COLOUR_BACKGROUND, Color.WHITE);
+        colourNavbar = preferences.getBoolean(HelperUtils.PREFERENCE_COLOUR_NAVBAR, false);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void applySettings() {
+        HelperUtils.applyColours(NoteActivity.this, colourPrimary, colourNavbar);
+
+        noteText.setBackgroundTintList(ColorStateList.valueOf(colourPrimary));
+        titleText.setBackgroundTintList(ColorStateList.valueOf(colourPrimary));
+
+        findViewById(R.id.scroll_view).setBackgroundColor(colourBackground);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(colourPrimary));
+
+        titleText.setTextColor(colourFont);
+        noteText.setTextColor(colourFont);
+
+        titleText.setHintTextColor(ColorUtils.setAlphaComponent(colourFont, 120));
+        noteText.setHintTextColor(ColorUtils.setAlphaComponent(colourFont, 120));
+    }
+
+    private void saveFile() {
+        String newTitle = titleText.getText().toString().trim().replace("/", " ");
+        String newNote = noteText.getText().toString().trim();
+
+        if (TextUtils.isEmpty(newTitle) && TextUtils.isEmpty(newNote)) {
+            return;
+        }
+
+        if (newTitle.equals(title) && newNote.equals(note)) {
+            return;
+        }
+
+        if (!title.equals(newTitle) || TextUtils.isEmpty(newTitle)) {
+            newTitle = newFileName(newTitle);
+            titleText.setText(newTitle);
+        }
+
+        HelperUtils.writeFile(NoteActivity.this, newTitle, newNote);
+
+        if (!TextUtils.isEmpty(title) && !newTitle.equals(title)) {
+            deleteFile(title + HelperUtils.TEXT_FILE_EXTENSION);
+        }
+
+        title = newTitle;
+
+    }
+
+    private String newFileName(String name) {
+        if (TextUtils.isEmpty(name)) {
+            name = getString(R.string.note);
+        }
+        if (HelperUtils.fileExists(NoteActivity.this, name)) {
+            int i = 1;
+            while (true) {
+                if (!HelperUtils.fileExists(NoteActivity.this, name + " (" + i + ")") || title.equals(name + " (" + i + ")")) {
+                    name = (name + " (" + i + ")");
+                    break;
+                }
+                i++;
+            }
+        }
+        return name;
+    }
+
+}

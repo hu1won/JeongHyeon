@@ -15,13 +15,29 @@
         <activity android:name=".search_page"></activity>
         <activity android:name=".MainActivity"></activity>
         <activity android:name=".Introduce"></activity>
-        <activity android:name=".Splash">
+        <activity android:name=".NotesListActivity"></activity>
+        <activity
+            android:name=".NoteActivity"
+            android:parentActivityName=".NotesListActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Splash"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".SettingsActivity"
+            android:parentActivityName=".NotesListActivity" />
     </application>
+
 
 </manifest>
