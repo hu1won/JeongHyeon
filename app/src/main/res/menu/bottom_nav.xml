@@ -3,7 +3,7 @@
     <item
         android:id="@+id/navigation_1"
         android:icon="@drawable/images2"
-        android:title="정세몬" />
+        android:title="전체" />
 
     <item
         android:id="@+id/navigation_2"
@@ -13,5 +13,13 @@
     <item
         android:id="@+id/navigation_3"
         android:icon="@drawable/main_record_icon"
-        android:title="정세몬C19" />
+        android:title="상세" />
+    <item
+        android:id="@+id/navigation_4"
+        android:icon="@drawable/main_record_icon"
+        android:title="메모" />
+    <item
+        android:id="@+id/navigation_5"
+        android:icon="@drawable/main_record_icon"
+        android:title="소개" />
 </menu>

@@ -58,9 +58,8 @@
             android:id="@+id/nav_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#a0daa9"
-            app:menu="@menu/bottom_nav"
-            />
+            android:background="#FFC107"
+            app:menu="@menu/bottom_nav" />
     </LinearLayout>
 </LinearLayout>
 
