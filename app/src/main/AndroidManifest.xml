@@ -14,6 +14,7 @@
         android:usesCleartextTraffic="true">
         <activity android:name=".search_page"></activity>
         <activity android:name=".MainActivity"></activity>
+        <activity android:name=".Introduce"></activity>
         <activity android:name=".Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

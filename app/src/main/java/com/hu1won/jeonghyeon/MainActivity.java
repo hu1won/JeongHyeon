@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         bottomNavigationView = findViewById(R.id.nav_view);
-        //이 부분에서 버튼 눌렀을 시에 색상 변경 해야됨
         bottomNavigationView.setItemIconTintList(null); // 아이콘 색깔 보이게끔 해줌
         bottomNavigationView.setItemIconSize(90);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -119,6 +118,10 @@ public class MainActivity extends AppCompatActivity {
                             columm = "jsmon_c19";
                             bottomNavigationView.setBackgroundColor(Color.parseColor("#FF6F61"));
                         }
+                        return true;
+                    case R.id.navigation_5:
+                        Intent intent2 = new Intent(MainActivity.this, Introduce.class);
+                        startActivity(intent2);
                         return true;
                 }
                 return false;
